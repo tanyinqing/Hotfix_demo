@@ -1,0 +1,54 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 22
+    buildToolsVersion "22.0.1"
+
+    defaultConfig {
+        applicationId "heattoupdate.tyq.com.hotfix_demo"
+        minSdkVersion 15
+        targetSdkVersion 22
+        versionCode 1
+        versionName "1.0"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    //以下这部分是使用aar新加的
+    repositories {
+        flatDir {
+            dirs 'libs'
+        }
+    }//到此为止
+    //配置自定义打包名称
+    applicationVariants.all { variant ->
+        variant.outputs.each { output ->
+            def outputFile = output.outputFile
+            def fileName
+            if (outputFile != null && outputFile.name.endsWith('.apk')) {
+                if (variant.buildType.name.equals('release')) {
+                    variant.mergedFlavor.versionName = getVersionName()
+                    //fileName = "XXXX_${variant.mergedFlavor.versionName}_release.apk"
+                    fileName = "new.apk"//   让图片放开 改ip 关闭log与内存卡的log
+                    //  fileName = "app-release.apk"// 内测版 让图片放开 改ip 关闭log与内存卡的log
+                } else if (variant.buildType.name.equals('debug')) {
+                    //variant.mergedFlavor.versionName = getVersionName()+"."+releaseTime()
+                    variant.mergedFlavor.versionName = getVersionName()
+                    fileName = "XXXX_${variant.mergedFlavor.versionName}_debug.apk"
+                }
+                output.outputFile = new File(outputFile.parent, fileName)
+            }
+        }
+    } //配置自定义打包名称
+}
+
+dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    compile 'com.android.support:appcompat-v7:22.1.1'
+    compile files('libs/alicloud-android-utils-1.0.3.jar')
+    compile files('libs/utdid4all-1.1.5.3_proguard.jar')
+    compile(name: 'hotfix_core-release-3.1.3', ext: 'aar')
+}
